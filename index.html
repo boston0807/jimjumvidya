@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Personality Quiz</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      margin: 0; height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+    .card {
+      width: 90%; max-width: 420px;
+      background: #1f2937;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.3);
+      animation: fadeIn .6s ease;
+    }
+    h1 { text-align: center; margin-bottom: 16px; }
+    .question {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      min-height: 48px;
+      transition: opacity .4s, transform .4s;
+    }
+    .answers button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 10px;
+      background: #374151;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .3s, transform .2s;
+    }
+    .answers button:hover {
+      background: #4f46e5;
+      transform: translateY(-2px);
+    }
+    .progress {
+      height: 6px;
+      background: #374151;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+    .progress-bar {
+      height: 100%; width: 0%;
+      background: #22c55e;
+      transition: width .4s ease;
+    }
+    .result {
+      text-align: center;
+      animation: pop .6s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pop {
+      0% { transform: scale(.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>แบบทดสอบลักษณะนิสัย</h1>
+    <div id="quiz">
+      <div class="question" id="question"></div>
+      <div class="answers" id="answers"></div>
+      <div class="progress"><div class="progress-bar" id="bar"></div></div>
+    </div>
+  </div>
+
+  <script>
+    // คำถาม (ยังไม่คำนวณคะแนนจริง)
+    const questions = [
+      'คุณชอบทำงานคนเดียวหรือทำงานเป็นทีม?',
+      'เวลาว่างคุณมักจะเลือกทำอะไร?',
+      'คุณตัดสินใจจากเหตุผลหรือความรู้สึกมากกว่า?'
+    ];
+
+    const choices = [
+      ['คนเดียว', 'เป็นทีม'],
+      ['พักผ่อนเงียบ ๆ', 'ออกไปพบผู้คน'],
+      ['เหตุผล', 'ความรู้สึก']
+    ];
+
+    let index = 0;
+    let score = 0; // placeholder
+
+    const qEl = document.getElementById('question');
+    const aEl = document.getElementById('answers');
+    const bar = document.getElementById('bar');
+
+    function showQuestion() {
+      qEl.style.opacity = 0;
+      qEl.style.transform = 'translateX(-10px)';
+
+      setTimeout(() => {
+        qEl.textContent = questions[index];
+        aEl.innerHTML = '';
+        choices[index].forEach(text => {
+          const btn = document.createElement('button');
+          btn.textContent = text;
+          btn.onclick = next;
+          aEl.appendChild(btn);
+        });
+        qEl.style.opacity = 1;
+        qEl.style.transform = 'translateX(0)';
+        bar.style.width = ((index) / questions.length) * 100 + '%';
+      }, 300);
+    }
+
+    function next() {
+      score++; // ยังไม่คิดจริง
+      index++;
+      if (index < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById('quiz').innerHTML = `
+        <div class="result">
+          <h2>ผลลัพธ์</h2>
+          <p>คุณเป็นคนที่มีลักษณะ <strong>เปิดรับสิ่งใหม่ ๆ</strong></p>
+          <p>(ตัวอย่างผลลัพธ์ — logic คำนวณจะเพิ่มภายหลัง)</p>
+        </div>
+      `;
+      bar.style.width = '100%';
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
