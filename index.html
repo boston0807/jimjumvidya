@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Personality Quiz</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bai+Jamjuree:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
     * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -22,7 +21,6 @@
       border-radius: 20px;
       padding: 24px;
       box-shadow: 0 20px 40px rgba(0,0,0,.3);
-      animation: fadeIn .6s ease;
     }
 
     h1 { 
@@ -63,7 +61,7 @@
       border-radius: 4px;
       overflow: hidden;
       margin-top: 16px;
-  
+      
     }
     .progress-bar {
       height: 100%; width: 0%;
@@ -72,13 +70,18 @@
     }
     .result {
       text-align: center;
-      animation: pop .6s ease;
     }
     .nav {
       display: flex;
       justify-content: space-between;
       margin-top: 12px;
     }
+
+    .nav button:hover{
+      background: #f06f05;
+      transform: translateY(-2px);
+    }
+
     .story-progress { display: none; }
     .quiz-progress { display: none; }
 
@@ -86,6 +89,7 @@
       max-width: 680px;
       padding: 40px;
     }
+
 
     .card.story .question {
       font-size: 28px;
@@ -110,14 +114,59 @@
       color: white;
       cursor: pointer;
     }
+
+    .animate-fade {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .animate-pop {
+      opacity: 0;
+      transform: scale(.3);
+    }
+
+    .card.animate-fade {
+      animation-delay: 0.2s;
+    }
+
+    .question.animate-fade {
+      animation-delay: 0.5s;
+    }
+
+    .answers button.animate-fade {
+      animation-delay: 0.8s;
+    }
+
+    .nav button.animate-fade {
+      animation-delay: 1s;
+    }
+
+    .result.animate-pop {
+      animation-delay: 0.4s;
+    }
+
+    .card.result {
+      max-width: 420px;
+      padding: 32px;
+    }
+
+    .card.result .result {
+      text-align: center;
+      animation: pop .5s ease forwards;
+    }
+
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+      
     }
     @keyframes pop {
-      0% { transform: scale(.8); opacity: 0; }
+      0% { transform: scale(.3); opacity: 0; }
+      50% { transform: scale(.6); opacity: .5;}
       100% { transform: scale(1); opacity: 1; }
     }
+    
     .logo img {
       position: absolute;
       top: 0;
@@ -143,6 +192,7 @@
     .card.quiz .answers button {
       font-size: 16px;
       padding: 12px;
+
     }
 
     .nav {
@@ -163,6 +213,7 @@
       <div class="nav">
       <button id="prev">ย้อนกลับ</button>
       <button id="next">ถัดไป</button>
+      <button id="restart">ลองทำใหม่</button>
       </div>
       <div class="progress story-progress">
         <div class="progress-bar" id="storyBar"></div>
@@ -202,7 +253,7 @@
       `ในสวนอาหารแห่งนี้ คุณคือใครกันแน่?`
     ];
 
-    let stepIndex = 0; // story + question
+    let stepIndex = 0;
     let questionIndex = 0;
     let score = [0,0,0,0,0]; 
 
@@ -213,11 +264,15 @@
     const title = document.querySelector('h1');
     const storyBar = document.getElementById('storyBar');
     const quizBar = document.getElementById('quizBar');
+    const nextbut = document.getElementById('next');
+    const prevbut = document.getElementById('prev');
+    const restartbut = document.getElementById('restart');
+    restartbut.style.display = "none";
+  
 
 
 
     function showStory() {
-      title.textContent = 'เนื้อเรื่องย่อ';
 
       card.classList.add('story');
       card.classList.remove('quiz');
@@ -231,12 +286,8 @@
       storyBar.style.width =
         ((stepIndex + 1) / storyboards.length) * 100 + '%';
     }
-
-
-
+    
     function showQuestion() {
-      title.textContent = 'แบบทดสอบลักษณะนิสัย';
-
       card.classList.add('quiz');
       card.classList.remove('story');
 
@@ -246,34 +297,65 @@
       qEl.textContent = questions[questionIndex];
       aEl.innerHTML = '';
 
-      quizBar.style.width =
-        (questionIndex / questions.length) * 100 + '%';
-
-      choices[questionIndex].forEach((text, choiceIndex) => {
+      choices[questionIndex].forEach((choice, i) => {
         const btn = document.createElement('button');
-        btn.textContent = text;
+        btn.textContent = choice;
         btn.onclick = () => {
-          score[choiceIndex]++;
+          score[i]++;
+          questionIndex++;
           nextStep();
         };
         aEl.appendChild(btn);
       });
+
+      quizBar.style.width =
+        ((questionIndex + 1) / questions.length) * 100 + '%';
     }
 
 
+function showResult() {
+  card.classList.remove('story');
+  card.classList.remove('quiz');
+  card.classList.add('result');
 
-    function nextStep() {
-      stepIndex++;
+  const maxScore = Math.max(...score);
+  const typeindex = score.indexOf(maxScore);
 
-      if (stepIndex < storyboards.length) {
-        showStory();
-      } else if (questionIndex < questions.length) {
-        showQuestion();
-        questionIndex++;
-      } else {
-        showResult();
-      }
-    }
+  const personalities = ['Greg','Tom','Rose','Ernest','Maggie'];
+
+  qEl.innerHTML = `
+    <div class="result animate-pop">
+      <h2>ผลลัพธ์คุณเป็นคนที่...</h2>
+      <p>คุณเป็นคนที่มีลักษณะ <strong>${personalities[typeindex]}</strong></p>
+      <p>เหมือนหมูเด้ง</p>
+    </div>
+  `;
+
+  aEl.innerHTML = '';
+  restartbut.style.display = "inline-block";
+  quizBar.style.width = '100%';
+}
+
+
+
+
+
+function nextStep() {
+  if (stepIndex < storyboards.length - 1) {
+    stepIndex++;
+    showStory();
+    return;
+  }
+
+  if (questionIndex < questions.length) {
+    prevbut.style.display = "none";
+    nextbut.style.display = "none";
+    showQuestion();
+    return;
+  }
+
+  showResult();
+}
 
     function prevStep() {
       if (stepIndex > 0) {
@@ -282,31 +364,25 @@
       }
     }
 
+    function restart() {
+      stepIndex = storyboards.length - 1;
+      questionIndex = 0;
+      score = [0,0,0,0,0];
 
-    function showResult() {
-      const maxScore = Math.max(...score);
-      const typeindex = score.indexOf(maxScore);
+      card.classList.remove('story', 'result');
+      card.classList.add('quiz');
 
-      const personalities = [
-    'นักวางแผนเป็นระบบ',
-    'คนอบอุ่นเป็นมิตร',
-    'นักวิเคราะห์',
-    'สายสร้างสรรค์',
-    'คนสงบลึกซึ้ง'
-  ];
+      restartbut.style.display = "none";
+      prevbut.style.display = "inline-block";
+      nextbut.style.display = "inline-block";
 
-      document.getElementById('quiz').innerHTML = `
-        <div class="result">
-          <h2>ผลลัพธ์คุณเป็นคนที่...</h2>
-          <p>คุณเป็นคนที่มีลักษณะ ${personalities[typeindex]}</strong></p>
-          <p>เหมือนหมูเด้ง</p>
-        </div>
-      `;
-      bar.style.width = '100%';
+      showQuestion();
     }
+
 
     document.getElementById('next').onclick = nextStep;
     document.getElementById('prev').onclick = prevStep;
+    restartbut.onclick = restart;
     showStory();
   </script>
 </body>
